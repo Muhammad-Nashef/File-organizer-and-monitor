@@ -57,7 +57,10 @@ class MonitorApp(QMainWindow):
         self.setWindowTitle("File Organizer Monitor")
         self.setGeometry(100, 100, 400, 300)
         self.setStyleSheet("background-color: #000000;")  # Black background
-        self.setWindowIcon(QIcon("icons/dashboard.png"))
+
+        icon_path = os.path.join(os.path.dirname(__file__), 'icons', 'dashboard.png')
+        self.setWindowIcon(QIcon(icon_path))
+        #self.setWindowIcon(QIcon("icons/dashboard.png"))
 
         self.folders = ['images', 'videos', 'audio', 'documents',
                         'spreadsheets', 'archives', 'software', 'others']
@@ -65,9 +68,18 @@ class MonitorApp(QMainWindow):
         self.base_folder = None
 
         self.init_ui()
+        self.center_window()  # Call the center_window method
+
         self.timer = QTimer(self)
         self.timer.setInterval(5000)
         self.timer.timeout.connect(self.update_folder_counts)
+
+    def center_window(self):
+        # Center the window on the screen
+        qr = self.frameGeometry()  # Get the frame geometry
+        cp = QApplication.primaryScreen().availableGeometry().center()  # Get screen center
+        qr.moveCenter(cp)  # Move the window's center to the screen's center
+        self.move(qr.topLeft())  # Move the window to the top-left of the centered frame
 
     def init_ui(self):
         layout = QGridLayout()
@@ -121,6 +133,15 @@ class MonitorApp(QMainWindow):
         self.timer.start()
 
     def organize_file(self, file_path):
+        # Extract the filename
+        filename = os.path.basename(file_path)
+
+        # Exclude specific files
+        excluded_files = ["README.txt", "dashboard.png"]
+        if filename in excluded_files:
+            print(f"Skipping: {filename}")
+            return
+
         print(f"Organizing: {file_path}")
         _, ext = os.path.splitext(file_path)
         ext = ext.lower()
